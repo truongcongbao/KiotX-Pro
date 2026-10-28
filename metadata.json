@@ -1,0 +1,6 @@
+{
+  "name": "KiotX PRO - Phần Mềm Quản Lý Cửa Hàng Thông Minh",
+  "description": "Phần mềm quản lý cửa hàng và quầy bán hàng POS chuyên nghiệp như KiotViet, tích hợp báo cáo doanh thu thông minh, quản lý xuất nhập tồn kho, kiểm hàng định kỳ, quản trị đối tác VIP và trợ lý ảo AI.",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
