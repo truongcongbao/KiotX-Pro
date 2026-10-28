@@ -53,11 +53,6 @@ async function startServer() {
     try {
       ai = new GoogleGenAI({
         apiKey: apiKey,
-        httpOptions: {
-          headers: {
-            'User-Agent': 'aistudio-build',
-          }
-        }
       });
       console.log("Gemini SDK initialized successfully server-side.");
     } catch (e) {
@@ -274,29 +269,33 @@ Nhiệm vụ của bạn:
         console.error(`[Force Delete Server Error] Lỗi ORM xóa bản ghi cha trong trials:`, trialErr);
       }
 
-      // Read API Key from firebase-applet-config.json for authorized REST DELETE
-      let firebaseApiKey = "";
+      // Read Firebase config dynamically for authorized REST DELETE
+      let firebaseApiKey = process.env.FIREBASE_API_KEY || "";
+      let firebaseProjectId = process.env.FIREBASE_PROJECT_ID || "";
+      let firestoreDbId = process.env.FIRESTORE_DATABASE_ID || "(default)";
       try {
         const configPath = path.join(process.cwd(), "firebase-applet-config.json");
         if (fs.existsSync(configPath)) {
           const config = JSON.parse(fs.readFileSync(configPath, "utf-8"));
-          firebaseApiKey = config.apiKey || "";
+          firebaseApiKey = firebaseApiKey || config.apiKey || "";
+          firebaseProjectId = firebaseProjectId || config.projectId || "";
+          firestoreDbId = process.env.FIRESTORE_DATABASE_ID || config.firestoreDatabaseId || "(default)";
         }
       } catch (e) {
-        console.warn("[Force Delete Server Warning] Không thể đọc firebase API key:", e);
+        console.warn("[Force Delete Server Warning] Không thể đọc cấu hình Firebase:", e);
       }
 
       // Also delete the Firestore document via REST API to bypass security rules with API Key
       let firestoreStatus = 0;
-      try {
-        const queryParam = firebaseApiKey ? `?key=${firebaseApiKey}` : "";
-        const firestoreUrl = `https://firestore.googleapis.com/v1/projects/sublime-zodiac-02t1j/databases/ai-studio-trnggiaphtthicng-743d1a97-2f9f-42a7-90e8-d59824245d9d/documents/kiot_trials/${id}${queryParam}`;
-        console.log(`[Force Delete Server] Gửi REST DELETE tới Firestore: ${firestoreUrl}`);
-        const fRes = await fetch(firestoreUrl, { method: "DELETE" });
-        firestoreStatus = fRes.status;
-        console.log(`[Force Delete Server] Firestore document deletion status for ${id}:`, fRes.status);
-      } catch (fErr: any) {
-        console.error(`[Force Delete Server Warning] Không thể xóa Firestore doc ${id}:`, fErr.message || fErr);
+      if (firebaseProjectId) {
+        try {
+          const queryParam = firebaseApiKey ? `?key=${firebaseApiKey}` : "";
+          const firestoreUrl = `https://firestore.googleapis.com/v1/projects/${firebaseProjectId}/databases/${firestoreDbId}/documents/kiot_trials/${id}${queryParam}`;
+          const fRes = await fetch(firestoreUrl, { method: "DELETE" });
+          firestoreStatus = fRes.status;
+        } catch (fErr: any) {
+          console.error(`[Force Delete Server Warning] Không thể xóa Firestore doc ${id}:`, fErr.message || fErr);
+        }
       }
 
       return res.json({ 
@@ -346,10 +345,21 @@ Nhiệm vụ của bạn:
 
       // Also delete the Firestore document via REST API to ensure no synchronization loops recreate it
       try {
-        const firestoreUrl = `https://firestore.googleapis.com/v1/projects/sublime-zodiac-02t1j/databases/ai-studio-trnggiaphtthicng-743d1a97-2f9f-42a7-90e8-d59824245d9d/documents/kiot_trials/${id}`;
-        console.log(`[Server Delete] Sending REST DELETE to Firestore: ${firestoreUrl}`);
-        const fRes = await fetch(firestoreUrl, { method: "DELETE" });
-        console.log(`[Server Delete] Firestore document deletion status for ${id}:`, fRes.status);
+        let firebaseProjectId = process.env.FIREBASE_PROJECT_ID || "";
+        let firestoreDbId = process.env.FIRESTORE_DATABASE_ID || "(default)";
+        let firebaseApiKey = process.env.FIREBASE_API_KEY || "";
+        const configPath = path.join(process.cwd(), "firebase-applet-config.json");
+        if (fs.existsSync(configPath)) {
+          const config = JSON.parse(fs.readFileSync(configPath, "utf-8"));
+          firebaseProjectId = firebaseProjectId || config.projectId || "";
+          firestoreDbId = process.env.FIRESTORE_DATABASE_ID || config.firestoreDatabaseId || "(default)";
+          firebaseApiKey = firebaseApiKey || config.apiKey || "";
+        }
+        if (firebaseProjectId) {
+          const queryParam = firebaseApiKey ? `?key=${firebaseApiKey}` : "";
+          const firestoreUrl = `https://firestore.googleapis.com/v1/projects/${firebaseProjectId}/databases/${firestoreDbId}/documents/kiot_trials/${id}${queryParam}`;
+          await fetch(firestoreUrl, { method: "DELETE" });
+        }
       } catch (fErr) {
         console.error(`[Server Delete Warning] Could not delete Firestore doc ${id}:`, fErr);
       }

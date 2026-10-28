@@ -12,11 +12,10 @@ Tài liệu này hướng dẫn bạn cách đóng gói mã nguồn **KiotX** hi
 
 ---
 
-## 📥 Bước 1: Tải mã nguồn về máy tính cá nhân
+## 📥 Bước 1: Chuẩn bị mã nguồn trên máy tính cá nhân
 
-1. Trên giao diện **Google AI Studio Build** của bạn.
-2. Mở góc trên cùng bên phải, nhấp vào nút **Settings (Cài đặt) / Export** hoặc nhấp vào biểu tượng **Tải xuống dưới dạng ZIP (Download as ZIP)**.
-3. Giải nén thư mục dự án KiotX vừa tải về vào một thư mục trên máy tính của bạn (Ví dụ: `C:\KiotX` hoặc `~/KiotX`).
+1. Tải mã nguồn dự án **KiotX PRO** từ kho lưu trữ Git riêng của bạn (`git clone`) hoặc tải tệp nén `.ZIP` của dự án về máy tính.
+2. Giải nén thư mục dự án **KiotX PRO** vào một thư mục cố định trên máy tính (Ví dụ: `C:\KiotX` hoặc `~/KiotX`).
 
 ---
 

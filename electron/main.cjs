@@ -5,8 +5,8 @@ const fs = require('fs');
 let mainWindow;
 const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged;
 
-// The production live URL for KiotX
-const LIVE_URL = 'https://ais-pre-n6gkpixewdlwl2vgnw2ab6-202499924698.asia-east1.run.app';
+// Production Cloud URL (configure via KIOTX_SERVER_URL or window-config.json)
+const LIVE_URL = process.env.KIOTX_SERVER_URL || 'http://localhost:3000';
 const DEV_URL = 'http://localhost:3000';
 
 // Config file path for persistent window bounds and preferences
@@ -54,8 +54,8 @@ function createWindow() {
     mainWindow.maximize();
   }
 
-  // Determine target URL
-  const targetUrl = isDev ? DEV_URL : LIVE_URL;
+  // Determine target URL (allow custom serverUrl in local config)
+  const targetUrl = config.serverUrl || (isDev ? DEV_URL : LIVE_URL);
 
   // Load the web app
   mainWindow.loadURL(targetUrl);
@@ -270,8 +270,16 @@ function createApplicationMenu() {
       label: 'Trợ Giúp',
       submenu: [
         {
-          label: 'Tài Liệu Hướng Dẫn',
-          click: () => shell.openExternal('https://ai.studio/build')
+          label: 'Hướng Dẫn Sử Dụng',
+          click: () => {
+            dialog.showMessageBox(mainWindow, {
+              type: 'info',
+              title: 'Hướng Dẫn Sử Dụng KiotX PRO',
+              message: 'Trung Tâm Hỗ Trợ KiotX PRO',
+              detail: '• Bán hàng nhanh (POS): Sử dụng phím tắt hoặc máy quét mã vạch tại quầy thu ngân.\n• Đồng bộ đám mây: Dữ liệu hóa đơn, tồn kho và sổ quỹ tự động lưu trữ thời gian thực.\n• Hỗ trợ kỹ thuật trực tiếp: congbaotruong8@gmail.com',
+              buttons: ['Đóng']
+            });
+          }
         },
         {
           label: 'Báo Cáo Sự Cố',
